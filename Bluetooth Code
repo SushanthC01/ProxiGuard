@@ -1,0 +1,213 @@
+#BLUETOOTH CODE
+
+
+
+//*Include the required header files**//
+
+#include <Servo.h>
+
+#include <SoftwareSerial.h>
+
+//__End of including headers__//
+
+//**Defining pins for US sensor**//
+
+#define trigPin 4
+
+#define echoPin 5
+
+///__End of defaniton__//
+
+SoftwareSerial Blueboy(10, 11); //Naming our Bluetooth module as Blueboy and defiing the RX and TX pins as 10 and 11
+
+Servo servo;  //Initializing a servo object called servo
+
+//**Global variabel declarations**//
+
+int BluetoothData; 
+
+int posc = 0; 
+
+int flag=10;
+
+//__End of global variable declartion__//
+
+ 
+
+void setup() //Runce only once
+
+{
+
+  servo.attach(9); //Servo is connected to pin 9
+
+  pinMode(trigPin, OUTPUT); //trigpin of US sensor is output
+
+  pinMode(echoPin, INPUT);  //echopin of US sensor is Input
+
+  Serial.begin(38400); //Serial monitor is started at 38400 baud rate for debugging
+
+  Blueboy.begin(9600); //Bluetooth module works at 9600 baudrate
+
+  Blueboy.println("Blueboy is active"); //Conformation from Bluetooth
+
+}
+
+
+void loop()  //The infinite loop
+
+{
+
+//**Program to start or stop the Survilance devide**//
+
+   if (Blueboy.available())
+
+{
+
+Serial.println("Incoming");   //for debugging
+
+BluetoothData=Blueboy.read(); //read data from bluetooth  
+
+Serial.println(BluetoothData); //for debugging
+
+   if (BluetoothData == 'p') //if the mobile app has sent a 'p'
+
+   {
+
+   flag=0; //play the device in auto mode
+
+   }
+
+   if (BluetoothData == 's') //if the mobile app has sent a 's'
+
+   {
+
+   flag=1; //stop the device and enter manual mode
+
+   } 
+
+Serial.println(flag); //for debugging
+
+}
+
+if (flag==0)
+
+servofun(); //Servo sweeps on own 
+
+if (flag==1)
+
+manualservo(); //Manual sweeping
+
+}
+
+//_End of loop program__//
+
+ 
+
+
+//**Function for servo to sweep**//
+
+void servofun()
+
+{
+
+  Serial.println("Sweeping"); //for debugging 
+
+  for(posc = 10;posc <= 170;posc++)   // Using 10 to 170 degree is safe than 0 to 180 because some servo might not be operational at extreme angels 
+
+  {                                
+
+    servo.write(posc); // set the position of servo motor
+
+    delay(50);  
+
+  us();    //measure the distance of objects sing the US sensor                
+
+  } 
+
+  
+
+  for(posc = 170;posc >= 10;posc--)   
+
+  {                                
+
+    servo.write(posc);
+
+    delay(50); 
+
+    us();    //measure the distance of objects sing the US sensor             
+
+  } 
+
+  Serial.println ("Scan Complete"); //for debugging
+
+  flag=0;
+
+}
+
+//**End of Servo sweeping function**//
+
+ 
+
+//**Function to control Servo manually**//
+
+void manualservo()
+
+{  
+
+us();
+
+// Get value from user and control the servo
+
+   if (Blueboy.available())
+
+{
+
+BluetoothData=Blueboy.read();
+
+Serial.println(BluetoothData);
+
+  servo.write(BluetoothData);
+
+  Serial.println("Written");
+
+   if (BluetoothData == 'p')
+
+   {
+
+   flag=0;
+
+   }
+
+}
+
+}
+
+//__End of manual control function__//
+
+ 
+
+//**Function to measure the distance**//
+
+void us()
+
+{
+
+ int duration, distance;
+
+  digitalWrite(trigPin, HIGH);
+
+  delayMicroseconds(1000);
+
+  digitalWrite(trigPin, LOW);
+
+  duration = pulseIn(echoPin, HIGH);
+
+  distance = (duration/2) / 29.1; // Calculates the distance from the sensor
+
+  if (distance<200 && distance >0)
+
+Blueboy.write(distance);       
+
+}
+
+//__End of distance measuring function__//
