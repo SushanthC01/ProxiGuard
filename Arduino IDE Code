@@ -1,0 +1,98 @@
+#ARDUINO CODE 
+
+
+
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+const int trig = 2;
+const int echo = 3;
+const int buzzer = 7; // Buzzer pin
+int duration = 0;
+int distance = 0;
+
+void setup() {
+  pinMode(trig, OUTPUT);
+  pinMode(echo, INPUT);
+  pinMode(buzzer, OUTPUT); // Set buzzer pin as output
+
+  for (int i = 4; i <= 13; i++) {
+    pinMode(i, OUTPUT);
+  }
+
+  lcd.begin(16, 2);
+  lcd.backlight();
+  Serial.begin(9600);
+}
+
+void loop() {
+  digitalWrite(trig, HIGH);
+  delayMicroseconds(1000);
+  digitalWrite(trig, LOW);
+  duration = pulseIn(echo, HIGH);
+  distance = (duration / 2) / 29.1;
+  Serial.println(distance);
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Distance: ");
+  lcd.print(distance);
+  lcd.print("CM");
+
+  if (distance > 80) { // Display "Clear" when distance is more than 80 cm
+    lcd.setCursor(0, 1);
+    lcd.print("Clear");
+    noTone(buzzer); // Turn off the buzzer
+  } else if (distance < 30 && distance > 10) { // Display "Hostile detected" when distance is less than 30 cm but more than 10 cm
+    lcd.setCursor(0, 1);
+    lcd.print("Hostile detected");
+    noTone(buzzer); // Turn off the buzzer
+  } else if (distance <= 10) { // Display "Alarm On" and activate the buzzer when distance is less than or equal to 10 cm
+    lcd.setCursor(0, 1);
+    lcd.print("Alarm On");
+    tone(buzzer, 1000); // Turn on the buzzer
+  } else {
+    lcd.setCursor(0, 1);
+    lcd.print("                "); // Clear the line
+    noTone(buzzer); // Turn off the buzzer
+  }
+
+  // LED logic based on distance remains unchanged
+  if (distance <= 10) {
+    digitalWrite(13, HIGH);
+  } else {
+    digitalWrite(13, LOW);
+  }
+
+  if (distance <= 13) {
+    digitalWrite(12, HIGH);
+  } else {
+    digitalWrite(12, LOW);
+  }
+
+  if (distance <= 15) {
+    digitalWrite(11, HIGH);
+  } else {
+    digitalWrite(11, LOW);
+  }
+
+  if (distance <= 18) {
+    digitalWrite(10, HIGH);
+  } else {
+    digitalWrite(10, LOW);
+  }
+
+  if (distance <= 21) {
+    digitalWrite(9, HIGH);
+  } else {
+    digitalWrite(9, LOW);
+  }
+
+  if (distance <= 24) {
+    digitalWrite(8, HIGH);
+  } else {
+    digitalWrite(8, LOW);
+  }
+
+  delay(500); // Delay to stabilize the display
+}
