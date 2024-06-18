@@ -1,5 +1,7 @@
 # ProxiGuard
-IoT-based radar system capable of detecting obstacles and hostiles, transmitting sensor data via Bluetooth
+IoT-based radar system capable of detecting obstacles and hostiles, transmitting sensor data via Bluetooth.
+NOTE : There are multiple ultrasonic sensors used in this project different boards have been used to program each of them individually.
+
 
 
 https://github.com/SushanthC01/ProxiGuard/assets/142321028/11b8c867-46a9-44e1-b811-edb419b90150
